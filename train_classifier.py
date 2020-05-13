@@ -8,7 +8,6 @@ Created on Tue May 12 16:05:40 2020
 import tweepy
 import pandas as pd
 from datetime import date
-from os.path import join
 from joblib import dump
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
@@ -75,7 +74,7 @@ for i, index in enumerate(twitter_data.index.values):
 twitter_data = twitter_data[twitter_data['text_no_link'] != '']
 
 # Save this dataset
-twitter_data.to_csv(join('data', '%s_twitter_training_data.csv' % str(date.today())))
+twitter_data.to_csv('%s_twitter_training_data.csv' % str(date.today()))
 
 # Initialize linear support vector machine classifier (SGDClassifier)
 pipeline_sgd = Pipeline([('vect', CountVectorizer()),
