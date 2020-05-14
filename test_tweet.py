@@ -2,7 +2,7 @@
 """
 Created on Tue May 12 16:05:40 2020
 
-@author: Guido
+@author: Guido Meijer
 """
 
 import tweepy

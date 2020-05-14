@@ -2,7 +2,13 @@
 """
 Created on Tue May 12 16:05:40 2020
 
-@author: Guido
+This script trains a machine learning classifier to predict whether a tweet was from Donald Trump
+or from a parody account. To create the training set, it pulls 1000 tweets from @realDonaldTrump
+and 1000 tweets from parody accounts (500 from @realDonaldTrFan and 500 from @RealDonalDrumpf)
+Then a logaritmic support vector machine classifier (SGDClassifier with a log loss) is trained
+on the data.
+
+@author: Guido Meijer
 """
 
 import tweepy
@@ -91,7 +97,7 @@ twitter_data = twitter_data[twitter_data['text_no_link'] != '']
 # Save this dataset
 twitter_data.to_csv('%s_twitter_training_data.csv' % str(date.today()))
 
-# Initialize linear support vector machine classifier (SGDClassifier)
+# Initialize logaritmic support vector machine classifier (SGDClassifier)
 pipeline_sgd = Pipeline([('vect', CountVectorizer()),
                          ('tfidf', TfidfTransformer()),
                          ('nb', SGDClassifier(loss='log'))])

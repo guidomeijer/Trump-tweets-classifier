@@ -2,7 +2,9 @@
 """
 Created on Thu May 14 17:21:15 2020
 
-@author: Guido
+Runs the bot
+
+@author: Guido Meijer
 """
 
 import time
