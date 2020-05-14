@@ -9,7 +9,6 @@ import tweepy
 import pandas as pd
 from datetime import date
 from joblib import dump
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -18,7 +17,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
 # Authenticate to Twitter
-api_keys = pd.read_csv('D:\Repositories\Trump-tweets-classifier\keys.csv')
+api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
 auth = tweepy.OAuthHandler(api_keys['api_key'].values[0],
                            api_keys['api_key_secret'].values[0])
 auth.set_access_token(api_keys['access_token'].values[0],
@@ -44,25 +43,41 @@ for i in range(len(real_tweets)):
     twitter_data.loc[twitter_data.shape[0] + 1, 'text'] = real_tweets[i].full_text
     twitter_data.loc[twitter_data.shape[0], 'real'] = 1
 
-# Query tweets from parody account
-fake_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200, include_rts=False,
-                                tweet_mode='extended', exclude_replies=True)
-oldest = fake_tweets[-1].id - 1
-while len(fake_tweets) < 1000:
-    new_fake_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200,
-                                        include_rts=False, tweet_mode='extended',
-                                        exclude_replies=True, max_id=oldest)
-    fake_tweets.extend(new_fake_tweets)
-    oldest = fake_tweets[-1].id - 1
+# Query tweets from parody accounts
+fake1_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200, include_rts=False,
+                                 tweet_mode='extended', exclude_replies=True)
+oldest = fake1_tweets[-1].id - 1
+while len(fake1_tweets) < 500:
+    new_fake1_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200,
+                                         include_rts=False, tweet_mode='extended',
+                                         exclude_replies=True, max_id=oldest)
+    fake1_tweets.extend(new_fake1_tweets)
+    oldest = fake1_tweets[-1].id - 1
+
+# Save to dataframe
+for i in range(len(fake1_tweets)):
+    twitter_data.loc[twitter_data.shape[0] + 1, 'text'] = fake1_tweets[i].full_text
+    twitter_data.loc[twitter_data.shape[0], 'real'] = 0
+
+# Other parody account
+fake2_tweets = api.user_timeline(screen_name='RealDonalDrumpf', count=200, include_rts=False,
+                                 tweet_mode='extended', exclude_replies=True)
+oldest = fake2_tweets[-1].id - 1
+while len(fake2_tweets) < 500:
+    new_fake2_tweets = api.user_timeline(screen_name='RealDonalDrumpf', count=200,
+                                         include_rts=False, tweet_mode='extended',
+                                         exclude_replies=True, max_id=oldest)
+    fake2_tweets.extend(new_fake2_tweets)
+    oldest = fake2_tweets[-1].id - 1
 
 # Add to dataframe
-for i in range(len(fake_tweets)):
-    twitter_data.loc[twitter_data.shape[0] + 1, 'text'] = fake_tweets[i].full_text
+for i in range(len(fake2_tweets)):
+    twitter_data.loc[twitter_data.shape[0] + 1, 'text'] = fake2_tweets[i].full_text
     twitter_data.loc[twitter_data.shape[0], 'real'] = 0
 
 # Clean up text
 for i, index in enumerate(twitter_data.index.values):
-	# Replace '&' character
+    # Replace '&' character
     twitter_data.loc[index, 'text'] = twitter_data.loc[index, 'text'].replace('&amp;', '&')
 
     # Create field excluding the link
