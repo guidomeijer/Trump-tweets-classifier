@@ -54,7 +54,7 @@ def post_tweet(tweet_text, tweet_without_link, tweet_real, clf):
 
 
 # Check every INTERVAL seconds for new tweets
-INTERVAL = 5
+INTERVAL = 60
 
 # Authenticate to Twitter
 api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
