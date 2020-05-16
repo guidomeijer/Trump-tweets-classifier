@@ -7,7 +7,7 @@ Runs the bot
 @author: Guido Meijer
 """
 
-import time
+import datetime
 import tweepy
 import pandas as pd
 from joblib import load
@@ -88,13 +88,13 @@ class MyStreamListener(tweepy.StreamListener):
 
             # Predict tweet
             clf = load('2020-05-14_SGD_model.joblib')
-            if status.id_str == "25073877":
+            if status.user.id_str == "25073877":
                 print('Found new tweet from realDonaldTrump, re-tweeting..')
                 post_tweet(tweet_text, tweet_without_link, 1, clf)
-            if status.id_str == "19570960":
+            if status.user.id_str == "19570960":
                 print('Found new tweet from realDonaldTrFan, re-tweeting..')
                 post_tweet(tweet_text, tweet_without_link, 0, clf)
-            if status.id_str == "1407822289":
+            if status.user.id_str == "1407822289":
                 print('Found new tweet from RealDonalDrumpf, re-tweeting..')
                 post_tweet(tweet_text, tweet_without_link, 0, clf)
 
@@ -118,7 +118,8 @@ realDonaldTrFan = "19570960"
 RealDonalDrumpf = "1407822289"
 
 # Start twitter stream
+print('Starting stream listener at %s'
+      % str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 myStreamListener = MyStreamListener()
-#myStreamListener = MyStreamListener(clf, realDonaldTrump, realDonaldTrFan, RealDonalDrumpf)
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
 myStream.filter(follow=[realDonaldTrump, realDonaldTrFan, RealDonalDrumpf])
