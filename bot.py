@@ -2,7 +2,11 @@
 """
 Created on Thu May 14 17:21:15 2020
 
-Runs the bot
+This is a Twitter bot that scrapes new tweets from Donald Trump and two parody accounts
+(@realDonaldTrFan and @RealDonalDrumpf). It runs the text of the tweet through a machine learning
+algorithm that predicts whether the tweet was real or parody. It then tweets a thread of tweets:
+the first one is the original text of the tweet, the second one is the prediction of the algorithm
+and the third one is whether the algorithm predicted it right.
 
 @author: Guido Meijer
 """
