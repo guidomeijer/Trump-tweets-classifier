@@ -9,7 +9,7 @@ Runs the bot
 
 import datetime
 import tweepy
-import pandas as pd
+from os import environ
 from joblib import load
 
 
@@ -100,11 +100,12 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 # Authenticate to Twitter
-api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
-auth = tweepy.OAuthHandler(api_keys['api_key'].values[0],
-                           api_keys['api_key_secret'].values[0])
-auth.set_access_token(api_keys['access_token'].values[0],
-                      api_keys['access_token_secret'].values[0])
+CONSUMER_KEY = environ['CONSUMER_KEY']
+CONSUMER_SECRET = environ['CONSUMER_SECRET']
+ACCESS_KEY = environ['ACCESS_KEY']
+ACCESS_SECRET = environ['ACCESS_KEY_SECRET']
+auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
+auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
 # Create API object
 api = tweepy.API(auth)
