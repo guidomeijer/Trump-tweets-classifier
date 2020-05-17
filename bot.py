@@ -29,19 +29,19 @@ def post_tweet(tweet_text, tweet_real, prediction, probability):
     # Post prediction of the classifier
     if (prediction == 0) & (tweet_real == 0):
         api.update_status(
-            ('I predict this tweet is FAKE with a probability of %d%%.\nI was right, this tweet is FAKE.'
+            ('I predict this tweet is FAKE with a probability of %d%%.\n\nI was right, this tweet is FAKE.'
              % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 1) & (tweet_real == 0):
         api.update_status(
-            ('Fake news!\nI predict this tweet is REAL (%d%% probability) but it is actually FAKE.'
+            ('Fake news! I predict this tweet is REAL (%d%% probability) but it is actually FAKE.'
              % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 1) & (tweet_real == 1):
         api.update_status(
-            ('I predict this tweet is REAL with a probability of %d%%.\nI was right, this tweet is REAL.'
+            ('I predict this tweet is REAL with a probability of %d%%.\n\nI was right, this tweet is REAL.'
              % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 0) & (tweet_real == 1):
         api.update_status(
-            ('This is weird!\nThis tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
+            ('This is weird! This tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
              % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 
 

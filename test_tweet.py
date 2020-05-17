@@ -20,8 +20,8 @@ auth.set_access_token(api_keys['access_token'].values[0],
 api = tweepy.API(auth)
 
 # Create test tweet
-tweet_text = 'OBAMAGATE!'
-tweet_real = 1
+tweet_text = 'Fake news says I should ware a mask... WRONG! I dont need a mask!! I have a letter!!!  A very nice letter! From a VERY expensive doctor - that says I have "Bone Spurs" - which will PREVENT ME from getting Coronavirus!'
+tweet_real = 0
 
 # Load in the fully trained linear support vector machine classifier
 clf = load('2020-05-14_SGD_model.joblib')
@@ -41,17 +41,17 @@ except:
 # Post prediction of the classifier
 if (prediction == 0) & (tweet_real == 0):
     api.update_status(
-        ('I predict this tweet is FAKE with a probability of %d%%.\nI was right, this tweet is FAKE.'
+        ('I predict this tweet is FAKE with a probability of %d%%.\n\nI was right, this tweet is FAKE.'
          % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 1) & (tweet_real == 0):
     api.update_status(
-        ('Fake news!\nI predict this tweet is REAL (%d%% probability) but it is actually FAKE.'
+        ('Fake news! The algorithm tells me this tweet is REAL (%d%% probability) but it is actually FAKE.'
          % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 1) & (tweet_real == 1):
     api.update_status(
-        ('I predict this tweet is REAL with a probability of %d%%.\nI was right, this tweet is REAL.'
+        ('I predict this tweet is REAL with a probability of %d%%.\n\nI was right, this tweet is REAL.'
          % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 0) & (tweet_real == 1):
     api.update_status(
-        ('This is weird!\nThis tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
+        ('This is weird! This tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
          % (probability * 100)), in_reply_to_status_id=first_tweet.id)
