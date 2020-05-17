@@ -13,6 +13,7 @@ it right.
 
 import datetime
 import tweepy
+import numpy as np
 from os import environ
 from joblib import load
 
@@ -84,19 +85,22 @@ class MyStreamListener(tweepy.StreamListener):
             probability = clf.predict_proba([tweet_without_link])[0]
             probability = probability[int(prediction)]
 
-            # Filter out tweets that only have a link or are boring
-            # (high probability of being real)
-            if (len(no_link) > 0) and (((prediction == 1) & (probability < 0.9))
-                                       or (prediction == 0)):
-                if status.user.id_str == "25073877":
-                    print('Found new tweet from realDonaldTrump, re-tweeting..')
-                    post_tweet(tweet_text, 1, prediction, probability)
-                if status.user.id_str == "19570960":
-                    print('Found new tweet from realDonaldTrFan, re-tweeting..')
-                    post_tweet(tweet_text, 0, prediction, probability)
-                if status.user.id_str == "1407822289":
-                    print('Found new tweet from RealDonalDrumpf, re-tweeting..')
-                    post_tweet(tweet_text, 0, prediction, probability)
+            # Only post one out of three tweets, otherwise the account tweets too often
+            if np.random.randint(3) == 0:
+
+                # Filter out tweets that only have a link or are boring
+                # (high probability of being real)
+                if (len(no_link) > 0) and (((prediction == 1) & (probability < 0.9))
+                                           or (prediction == 0)):
+                    if status.user.id_str == "25073877":
+                        print('Found new tweet from realDonaldTrump, re-tweeting..')
+                        post_tweet(tweet_text, 1, prediction, probability)
+                    if status.user.id_str == "19570960":
+                        print('Found new tweet from realDonaldTrFan, re-tweeting..')
+                        post_tweet(tweet_text, 0, prediction, probability)
+                    if status.user.id_str == "1407822289":
+                        print('Found new tweet from RealDonalDrumpf, re-tweeting..')
+                        post_tweet(tweet_text, 0, prediction, probability)
 
 
 # Authenticate to Twitter
