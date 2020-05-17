@@ -20,7 +20,7 @@ auth.set_access_token(api_keys['access_token'].values[0],
 api = tweepy.API(auth)
 
 # Create test tweet
-tweet_text = 'OBAMAGATE!'
+tweet_text = 'OBAMA GATE!'
 tweet_real = 1
 
 # Load in the fully trained linear support vector machine classifier
@@ -34,12 +34,12 @@ probability = clf.predict_proba([tweet_text])[0]
 first_tweet = api.update_status(tweet_text)
 if prediction == 0:
     second_tweet = api.update_status(
-        ('I predict this tweet is FAKE with a probability of %d%%, what do you think?'
+        ('I predict this tweet is FAKE with a probability of %d%%.\nWhat do you think?'
          % (probability[0] * 100)),
         in_reply_to_status_id=first_tweet.id)
 elif prediction == 1:
     second_tweet = api.update_status(
-        ('I predict this tweet is REAL with a probability of %d%%, what do you think?'
+        ('I predict this tweet is REAL with a probability of %d%%.\nWhat do you think?'
          % (probability[1] * 100)),
         in_reply_to_status_id=first_tweet.id)
 if (prediction == 0) & (tweet_real == 0):
