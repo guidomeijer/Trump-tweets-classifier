@@ -20,7 +20,7 @@ auth.set_access_token(api_keys['access_token'].values[0],
 api = tweepy.API(auth)
 
 # Create test tweet
-tweet_text = 'OBAMA GATE!'
+tweet_text = 'OBAMAGATE!'
 tweet_real = 1
 
 # Load in the fully trained linear support vector machine classifier
@@ -29,28 +29,29 @@ clf = load('2020-05-14_SGD_model.joblib')
 # Classify tweet
 prediction = clf.predict([tweet_text])[0]
 probability = clf.predict_proba([tweet_text])[0]
+probability = probability[int(prediction)]
 
 # Tweet results
-first_tweet = api.update_status(tweet_text)
-if prediction == 0:
-    second_tweet = api.update_status(
-        ('I predict this tweet is FAKE with a probability of %d%%.\nWhat do you think?'
-         % (probability[0] * 100)),
-        in_reply_to_status_id=first_tweet.id)
-elif prediction == 1:
-    second_tweet = api.update_status(
-        ('I predict this tweet is REAL with a probability of %d%%.\nWhat do you think?'
-         % (probability[1] * 100)),
-        in_reply_to_status_id=first_tweet.id)
+# Post original tweet
+try:
+    first_tweet = api.update_status(tweet_text)
+except:
+    print('Tweet was already tweeted, abort!')
+
+# Post prediction of the classifier
 if (prediction == 0) & (tweet_real == 0):
-    third_tweet = api.update_status('I was right, this tweet was FAKE',
-                                    in_reply_to_status_id=second_tweet.id)
+    api.update_status(
+        ('I predict this tweet is FAKE with a probability of %d%%.\nI was right, this tweet is FAKE.'
+         % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 1) & (tweet_real == 0):
-    third_tweet = api.update_status('I was wrong, this tweet was FAKE',
-                                    in_reply_to_status_id=second_tweet.id)
+    api.update_status(
+        ('Fake news!\nI predict this tweet is REAL (%d%% probability) but it is actually FAKE.'
+         % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 1) & (tweet_real == 1):
-    third_tweet = api.update_status('I was right, this tweet was REAL',
-                                    in_reply_to_status_id=second_tweet.id)
+    api.update_status(
+        ('I predict this tweet is REAL with a probability of %d%%.\nI was right, this tweet is REAL.'
+         % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 elif (prediction == 0) & (tweet_real == 1):
-    third_tweet = api.update_status('I was wrong, this tweet was REAL',
-                                    in_reply_to_status_id=second_tweet.id)
+    api.update_status(
+        ('This is weird!\nThis tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
+         % (probability * 100)), in_reply_to_status_id=first_tweet.id)

@@ -30,19 +30,19 @@ def post_tweet(tweet_text, tweet_real, prediction, probability):
     if (prediction == 0) & (tweet_real == 0):
         api.update_status(
             ('I predict this tweet is FAKE with a probability of %d%%.\nI was right, this tweet is FAKE.'
-             % (probability[0] * 100)), in_reply_to_status_id=first_tweet.id)
+             % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 1) & (tweet_real == 0):
         api.update_status(
             ('Fake news!\nI predict this tweet is REAL (%d%% probability) but it is actually FAKE.'
-             % (probability[0] * 100)), in_reply_to_status_id=first_tweet.id)
+             % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 1) & (tweet_real == 1):
         api.update_status(
             ('I predict this tweet is REAL with a probability of %d%%.\nI was right, this tweet is REAL.'
-             % (probability[1] * 100)), in_reply_to_status_id=first_tweet.id)
+             % (probability * 100)), in_reply_to_status_id=first_tweet.id)
     elif (prediction == 0) & (tweet_real == 1):
         api.update_status(
             ('This is weird!\nThis tweet looks FAKE to me (%d%% probability) but it is actually REAL!'
-             % (probability[0] * 100)), in_reply_to_status_id=first_tweet.id)
+             % (probability * 100)), in_reply_to_status_id=first_tweet.id)
 
 
 def from_creator(status):
@@ -82,10 +82,11 @@ class MyStreamListener(tweepy.StreamListener):
             clf = load('2020-05-14_SGD_model.joblib')
             prediction = clf.predict([tweet_without_link])[0]
             probability = clf.predict_proba([tweet_without_link])[0]
+            probability = probability[int(prediction)]
 
             # Filter out tweets that only have a link or are boring
             # (high probability of being real)
-            if (len(no_link) > 0) and (((prediction == 1) & (probability < 0.8))
+            if (len(no_link) > 0) and (((prediction == 1) & (probability < 0.9))
                                        or (prediction == 0)):
                 if status.user.id_str == "25073877":
                     print('Found new tweet from realDonaldTrump, re-tweeting..')
