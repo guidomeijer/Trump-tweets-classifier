@@ -13,6 +13,7 @@ it right.
 
 import datetime
 import tweepy
+import numpy as np
 from os import environ
 from joblib import load
 
@@ -75,7 +76,9 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_text = tweet_text.replace('&amp;', '&')
 
             # Skip tweets with links because they are mostly responses to what's in the link
-            if 'http' not in tweet_text:
+            # and randomly skip half of the tweets to prevent tweeting too much and filling
+            # everyones timeline
+            if 'http' not in tweet_text and (np.random.randint(2) == 0):
 
                 # Predict whether tweet is real or fake
                 clf = load('2020-05-14_SGD_model.joblib')

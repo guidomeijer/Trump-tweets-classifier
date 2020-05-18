@@ -35,7 +35,9 @@ class MyStreamListener(tweepy.StreamListener):
 
         if from_creator(status):
             # Get the tweet text
-            if 'extended_tweet' not in status._json:
+            if 'extended_tweet' in status._json:
+                print(status.extended_tweet['full_text'])
+            else:
                 print(status.text)
 
 
@@ -59,4 +61,5 @@ print('Starting stream listener at %s'
       % str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
 myStreamListener = MyStreamListener()
 myStream = tweepy.Stream(auth=api.auth, listener=myStreamListener)
-myStream.filter(track=['python'])
+# myStream.filter(track=['python'])
+myStream.filter(follow=[realDonaldTrump, realDonaldTrFan, RealDonalDrumpf])
