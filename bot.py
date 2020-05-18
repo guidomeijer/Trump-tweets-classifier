@@ -13,7 +13,6 @@ it right.
 
 import datetime
 import tweepy
-import numpy as np
 from os import environ
 from joblib import load
 
@@ -75,23 +74,17 @@ class MyStreamListener(tweepy.StreamListener):
             # Remove weird & symbol text
             tweet_text = tweet_text.replace('&amp;', '&')
 
-            # Remove any links
-            no_link = list(filter(lambda x: 'http' not in x, tweet_text.split()))
-            tweet_without_link = ' '.join(word for word in no_link)
+            # Skip tweets with links because they are mostly responses to what's in the link
+            if 'http' not in tweet_text:
 
-            # Predict whether tweet is real or fake using the text without link
-            clf = load('2020-05-14_SGD_model.joblib')
-            prediction = clf.predict([tweet_without_link])[0]
-            probability = clf.predict_proba([tweet_without_link])[0]
-            probability = probability[int(prediction)]
+                # Predict whether tweet is real or fake
+                clf = load('2020-05-14_SGD_model.joblib')
+                prediction = clf.predict([tweet_text])[0]
+                probability = clf.predict_proba([tweet_text])[0]
+                probability = probability[int(prediction)]
 
-            # Only post one out of three tweets, otherwise the account tweets too often
-            if np.random.randint(3) == 0:
-
-                # Filter out tweets that only have a link or are boring
-                # (high probability of being real)
-                if (len(no_link) > 0) and (((prediction == 1) & (probability < 0.9))
-                                           or (prediction == 0)):
+                # Filter out tweets that are boring (high probability of being real)
+                if (((prediction == 1) & (probability < 0.9)) or (prediction == 0)):
                     if status.user.id_str == "25073877":
                         print('Found new tweet from realDonaldTrump, re-tweeting..')
                         post_tweet(tweet_text, 1, prediction, probability)
