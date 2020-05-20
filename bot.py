@@ -144,7 +144,7 @@ class MyStreamListener(tweepy.StreamListener):
 
                     # Post tweet to timeline
                     if status.in_reply_to_user_id == status.user.id:
-                        post_thread(status.id, prediction, probability, status.user.id_str)
+                        # post_thread(status.id, prediction, probability, status.user.id_str)
                     else:
                         post_tweet(tweet_text, prediction, probability, status.user.id_str)
 
