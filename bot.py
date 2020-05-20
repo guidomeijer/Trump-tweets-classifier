@@ -13,7 +13,6 @@ it right.
 
 import datetime
 import tweepy
-import numpy as np
 from os import environ
 from joblib import load
 
@@ -29,25 +28,28 @@ def post_tweet(tweet_text, prediction, probability, user_id):
 
     # Generate text of prediction
     if (prediction == 0) & (user_id == "19570960"):
-        second_tweet_text = """I predict this tweet is FAKE with a probability of %d%%.\n\n
-        I was right, this tweet is from the parody account @realDonaldTrFan.""" % (
-                                                                        probability * 100)
+        second_tweet_text = ('I predict this tweet is FAKE with a probability of %d%%.\n\n'
+                             + 'I was right, this tweet is from the parody account '
+                             + '@realDonaldTrFan.') % (probability * 100)
     elif (prediction == 1) & (user_id == "19570960"):
-        second_tweet_text = """Fake news! I predict this tweet is REAL (%d%% probability) but
-        it is actually from the parody account @realDonaldTrFan.""" % (probability * 100)
+        second_tweet_text = ('Fake news! I predict this tweet is REAL (%d%% probability) but '
+                             + 'it is actually from the parody account '
+                             + '@realDonaldTrFan.') % (probability * 100)
     elif (prediction == 0) & (user_id == "1407822289"):
-        second_tweet_text = """I predict this tweet is FAKE with a probability of %d%%.\n\n
-        I was right, this tweet is from the parody account @RealDonalDrumpf.""" % (
-                                                                        probability * 100)
+        second_tweet_text = ('I predict this tweet is FAKE with a probability of %d%%.\n\n'
+                             + 'I was right, this tweet is from the parody account '
+                             + '@RealDonalDrumpf.') % (probability * 100)
     elif (prediction == 1) & (user_id == "1407822289"):
-        second_tweet_text = """Fake news! I predict this tweet is REAL (%d%% probability) but
-        it is actually from the parody account @RealDonalDrumpf.""" % (probability * 100)
+        second_tweet_text = ('Fake news! I predict this tweet is REAL (%d%% probability) but '
+                             + 'it is actually from the parody account '
+                             + '@RealDonalDrumpf.') % (probability * 100)
     elif (prediction == 1) & (user_id == "25073877"):
-        second_tweet_text = """I predict this tweet is REAL with a probability of %d%%.\n\n
-        I was right, this tweet is from @realDonaldTrump himself.""" % (probability * 100)
+        second_tweet_text = ('I predict this tweet is REAL with a probability of %d%%.\n\n'
+                             + 'I was right, this tweet is from '
+                             + '@realDonaldTrump himself.') % (probability * 100)
     elif (prediction == 0) & (user_id == "25073877"):
-        second_tweet_text = """This is weird! This tweet looks FAKE to me (%d%% probability)
-        but it is actually from @realDonaldTrump!""" % (probability * 100)
+        second_tweet_text = ('This is weird! This tweet looks FAKE to me (%d%% probability) '
+                             + 'but it is really from @realDonaldTrump!') % (probability * 100)
 
     # Post prediction of classifier as tweet
     api.update_status(second_tweet_text, in_reply_to_status_id=first_tweet.id)
@@ -85,27 +87,25 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_text = tweet_text.replace('&amp;', '&')
 
             # Skip tweets with links because they are mostly responses to what's in the link
-            # and randomly skip 2/3 of the tweets to prevent tweeting too much and filling
-            # everyones timeline
-            if 'http' not in tweet_text and (np.random.randint(3) == 0):
+            if 'http' not in tweet_text:
 
                 # Predict whether tweet is real or fake
                 clf = load('2020-05-14_SGD_model.joblib')
                 prediction = clf.predict([tweet_text])[0]
-                probability = clf.predict_proba([tweet_text])[0]
-                probability = probability[int(prediction)]
+                probs = clf.predict_proba([tweet_text])[0]
+                probability = probs[int(prediction)]
 
                 # Filter out tweets that are boring (high probability of being real)
                 if (((prediction == 1) & (probability < 0.9)) or (prediction == 0)):
-                    if status.user.id_str == "25073877":
-                        print('Found new tweet from realDonaldTrump, re-tweeting..')
-                        post_tweet(tweet_text, prediction, probability, status.user.id_str)
-                    if status.user.id_str == "19570960":
-                        print('Found new tweet from realDonaldTrFan, re-tweeting..')
-                        post_tweet(tweet_text, 0, prediction, probability)
-                    if status.user.id_str == "1407822289":
-                        print('Found new tweet from RealDonalDrumpf, re-tweeting..')
-                        post_tweet(tweet_text, 0, prediction, probability)
+
+                    # Post tweet to timeline
+                    post_tweet(tweet_text, prediction, probability, status.user.id_str)
+
+                    # If it's from Trump, post a reaction to his tweet
+                    if status.user_id_str == '25073877':
+                        reply_text = ('I am a machine learning algorithm and I give this tweet '
+                                      + 'a %.1f out of 10 for absurdity') % (probs[1] * 10)
+                        api.update_status(reply_text, in_reply_to_status_id=status.id)
 
 
 # Authenticate to Twitter
