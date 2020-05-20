@@ -42,9 +42,8 @@ class MyStreamListener(tweepy.StreamListener):
         else:
             print(dir(status.text))
         """
-        if hasattr(status, 'quoted_status'):
-            print(status.text)
-            print(dir(status.text))
+        print(status.id)
+        exit(1)
 
 
 # Authenticate to Twitter
