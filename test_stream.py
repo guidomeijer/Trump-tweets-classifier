@@ -19,6 +19,8 @@ import pandas as pd
 def from_creator(status):
     if hasattr(status, 'retweeted_status'):
         return False
+    elif hasattr(status, 'quoted_status'):
+        return False
     elif status.in_reply_to_status_id is not None:
         return False
     elif status.in_reply_to_screen_name is not None:
@@ -33,12 +35,16 @@ class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
 
-        if from_creator(status):
-            # Get the tweet text
-            if 'extended_tweet' in status._json:
-                print(status.extended_tweet['full_text'])
-            else:
-                print(status.text)
+        """
+        # Get the tweet text
+        if 'extended_tweet' in status._json:
+            print(status.extended_tweet['full_text'])
+        else:
+            print(dir(status.text))
+        """
+        if hasattr(status, 'quoted_status'):
+            print(status.text)
+            print(dir(status.text))
 
 
 # Authenticate to Twitter
