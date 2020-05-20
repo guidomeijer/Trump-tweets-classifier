@@ -87,7 +87,8 @@ class MyStreamListener(tweepy.StreamListener):
             tweet_text = tweet_text.replace('&amp;', '&')
 
             # Skip tweets with links because they are mostly responses to what's in the link
-            if 'http' not in tweet_text:
+            # Skip tweets that end with .. because they are usually a thread
+            if ('http' not in tweet_text) and (tweet_text[-2:] != '..'):
 
                 # Predict whether tweet is real or fake
                 clf = load('2020-05-14_SGD_model.joblib')
