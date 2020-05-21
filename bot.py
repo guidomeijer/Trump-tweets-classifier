@@ -108,8 +108,14 @@ def is_tweet(status):
         return False
     elif hasattr(status, 'quoted_status'):
         return False
-    elif status.in_reply_to_user_id == status.user.id:
+    elif (status.in_reply_to_user_id == status.user.id) and ((status.user.id == 25073877
+                                                              | status.user.id == 19570960
+                                                              | status.user.id == 1407822289)):
         return True
+    elif status.in_reply_to_status_id is not None:
+        return False
+    elif status.in_reply_to_screen_name is not None:
+        return False
     elif status.in_reply_to_user_id is not None:
         return False
     else:
@@ -144,12 +150,12 @@ class MyStreamListener(tweepy.StreamListener):
 
                     # Post tweet to timeline
                     if status.in_reply_to_user_id == status.user.id:
-                        # post_thread(status.id, prediction, probability, status.user.id_str)
+                        post_thread(status.id, prediction, probability, status.user.id_str)
                     else:
                         post_tweet(tweet_text, prediction, probability, status.user.id_str)
 
                     # If it's from Trump, post a reaction to his tweet
-                    if status.user_id_str == "25073877":
+                    if status.user.id == 25073877:
                         reply_text = ('I am a machine learning algorithm and I give this tweet'
                                       + ' a %.1f out of 10 for absurdity') % (
                                                                       (1 - probs[1]) * 10)
