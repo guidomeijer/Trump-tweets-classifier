@@ -13,6 +13,7 @@ it right.
 
 import datetime
 import tweepy
+import numpy as np
 from os import environ
 from joblib import load
 
@@ -68,50 +69,11 @@ def get_tweet_text(status):
     return tweet_text
 
 
-def post_thread(tweet_id, prediction, probability, user_id):
-
-    # Get entire thread
-    reached_first = False
-    thread_text = []
-    while reached_first is False:
-        status = api.get_status(tweet_id, tweet_mode='extended')
-        tweet_text = status.full_text
-        thread_text.append(tweet_text)
-        if status.in_reply_to_status_id is None:
-            reached_first = True
-        else:
-            tweet_id = status.in_reply_to_status_id
-
-    # Post original thread of tweets
-    for i in range(len(thread_text)-1, -1, -1):
-        if i == len(thread_text)-1:
-            try:
-                posted_tweet = api.update_status(thread_text[i])
-            except:
-                print('Tweet was already tweeted, abort!')
-                return
-        else:
-            try:
-                posted_tweet = api.update_status(thread_text[i],
-                                                 in_reply_to_status_id=posted_tweet.id)
-            except:
-                print('Tweet was already tweeted, abort!')
-                return
-
-    # Post prediction of classifier as tweet
-    pred_tweet_text = get_prediction_tweet_text(prediction, probability, user_id)
-    api.update_status(pred_tweet_text, in_reply_to_status_id=posted_tweet.id)
-
-
 def is_tweet(status):
     if hasattr(status, 'retweeted_status'):
         return False
     elif hasattr(status, 'quoted_status'):
         return False
-    elif (status.in_reply_to_user_id == status.user.id) and ((status.user.id == 25073877
-                                                              | status.user.id == 19570960
-                                                              | status.user.id == 1407822289)):
-        return True
     elif status.in_reply_to_status_id is not None:
         return False
     elif status.in_reply_to_screen_name is not None:
@@ -146,13 +108,12 @@ class MyStreamListener(tweepy.StreamListener):
                 probability = probs[int(prediction)]
 
                 # Filter out tweets that are boring (high probability of being real)
-                if (((prediction == 1) & (probability < 0.8)) or (prediction == 0)):
+                # and only post one out of three tweets to prevent filling everybody's timeline
+                if (((((prediction == 1) & (probability < 0.8)) or (prediction == 0)))
+                        and (np.randint(3) == 0)):
 
                     # Post tweet to timeline
-                    if status.in_reply_to_user_id == status.user.id:
-                        post_thread(status.id, prediction, probability, status.user.id_str)
-                    else:
-                        post_tweet(tweet_text, prediction, probability, status.user.id_str)
+                    post_tweet(tweet_text, prediction, probability, status.user.id_str)
 
                     # If it's from Trump, post a reaction to his tweet
                     if status.user.id == 25073877:
@@ -161,6 +122,14 @@ class MyStreamListener(tweepy.StreamListener):
                                                                       (1 - probs[1]) * 10)
                         api.update_status(reply_text, in_reply_to_status_id=status.id,
                                           auto_populate_reply_metadata=True)
+
+                # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
+                if (status.user.id == 25073877) or (status.user.id == 19570960):
+                    reply_text = ('I am a machine learning algorithm and I give this tweet'
+                                  + ' a %.1f out of 10 for absurdity') % (
+                                                                  (1 - probs[1]) * 10)
+                    api.update_status(reply_text, in_reply_to_status_id=status.id,
+                                      auto_populate_reply_metadata=True)
 
 
 # Authenticate to Twitter
