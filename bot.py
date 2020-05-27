@@ -115,14 +115,6 @@ class MyStreamListener(tweepy.StreamListener):
                     # Post tweet to timeline
                     post_tweet(tweet_text, prediction, probability, status.user.id_str)
 
-                    # If it's from Trump, post a reaction to his tweet
-                    if status.user.id == 25073877:
-                        reply_text = ('I am a machine learning algorithm and I give this tweet'
-                                      + ' a %.1f out of 10 for absurdity') % (
-                                                                      (1 - probs[1]) * 10)
-                        api.update_status(reply_text, in_reply_to_status_id=status.id,
-                                          auto_populate_reply_metadata=True)
-
                 # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
                 if (status.user.id == 25073877) or (status.user.id == 19570960):
                     reply_text = ('I am a machine learning algorithm and I give this tweet'
