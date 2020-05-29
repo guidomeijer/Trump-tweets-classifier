@@ -150,8 +150,8 @@ class MyStreamListener(tweepy.StreamListener):
 
                 # Filter out tweets that are boring (high probability of being real)
                 # and only post one out of three tweets to prevent filling everybody's timeline
-                if (((((prediction == 1) & (probability < 0.8)) or (prediction == 0)))
-                        and (np.randint(3) == 0)):
+                if ((((prediction == 1) & (probability < 0.8)) or (prediction == 0))
+                        and (np.random.randint(3) == 0)):
 
                     # Post tweet to timeline
                     post_tweet(tweet_text, prediction, probability, status.user.id_str)
