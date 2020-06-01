@@ -158,8 +158,8 @@ class MyStreamListener(tweepy.StreamListener):
 
                 # If it's from realDonaldTrFan, post a reaction to his tweet
                 if (status.user.id == 19570960) or (status.user.id == 25073877):
-                    reply_text = ('I am a bot and I give this tweet',
-                                  + ' a %.1f out of 10 for absurdity.\n\n',
+                    reply_text = ('I am a bot and I give this tweet'
+                                  + ' a %.1f out of 10 for absurdity.\n\n'
                                   + 'Follow me for more funny predictions!') % (probs[0] * 10)
                     api.update_status(reply_text, in_reply_to_status_id=status.id,
                                       auto_populate_reply_metadata=True)
