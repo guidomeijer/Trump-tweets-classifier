@@ -23,7 +23,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
 # Authenticate to Twitter
-api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
+api_keys = pd.read_csv('~/Repositories/Trump-tweets-classifier/keys.csv')
 auth = tweepy.OAuthHandler(api_keys['api_key'].values[0],
                            api_keys['api_key_secret'].values[0])
 auth.set_access_token(api_keys['access_token'].values[0],
