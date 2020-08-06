@@ -47,47 +47,6 @@ def get_prediction_tweet_text(prediction, probability, user_id):
     return pred_tweet_text
 
 
-def get_reply_text(probability):
-
-    # Generate text of prediction
-    if probability < 0.1:
-        reply_tweet_text = 'I am a bot and this tweet looks perfectly normal to me.'
-    elif (probability > 0.1) & (probability < 0.2):
-        reply_tweet_text = ('I am a bot and I think this tweet is not completely normal.')
-    elif (probability > 0.2) & (probability < 0.3):
-        reply_tweet_text = ('I am an algoritm and I classify this tweet as "slightly absurd".')
-    elif (probability > 0.3) & (probability < 0.4):
-        reply_tweet_text = ('This tweet looks absurd to me! But what do I know, '
-                            + 'I am just a bot.\n\nFollow me for more funny predictions :)')
-    elif (probability > 0.4) & (probability < 0.5):
-        reply_tweet_text = ('I am a machine learning algorithm, I did the math and my numbers '
-                            + 'tell me that this tweet is very wacky!\n\nFollow me for more '
-                            + 'funny predictions.')
-    elif (probability > 0.5) & (probability < 0.6):
-        reply_tweet_text = ('Wow, this tweet is absurd! Even I can see it, and I am just a bot.'
-                            + '\n\nFollow me for more funny predictions!')
-    elif (probability > 0.6) & (probability < 0.7):
-        reply_tweet_text = ('I am a machine learning algorithm and my calculations tell me that '
-                            + 'what Trump is saying here is completely bonkers!\n\n'
-                            + 'Follow me for more funny predictions.')
-    elif (probability > 0.7) & (probability < 0.8):
-        reply_tweet_text = ('What Trump is saying here is ludicrous! I am a machine learning '
-                            + 'algorithm and I give this tweet a whopping %.1f on the '
-                            + 'absurd-o-meter!\n\nFollow me for more funny predictions.') % (
-                                                                      probability * 10)
-    elif (probability > 0.8) & (probability < 0.9):
-        reply_tweet_text = ('I did the math and this tweet is completely bat-shit crazy! '
-                            + 'It scores a %.1f out of 10 for absurdity!'
-                            + '\n\nI am a bot, follow me for more funny predictions.') % (
-                                                                      probability * 10)
-    elif (probability > 0.9) & (probability < 1):
-        reply_tweet_text = ('WHAT TRUMP IS SAYING HERE IS COMPLETELY IDIOTIC! IT SCORES A '
-                            + '%.1f ON THE ABSURD-O-METER!\n\n'
-                            + 'I am a bot, follow me for more funny predictions.') % (
-                                                                      probability * 10)
-    return reply_tweet_text
-
-
 def post_tweet(tweet_text, prediction, probability, user_id):
 
     # Post original tweet
@@ -156,21 +115,12 @@ class MyStreamListener(tweepy.StreamListener):
                     # Post tweet to timeline
                     post_tweet(tweet_text, prediction, probability, status.user.id_str)
 
-                # If it's from realDonaldTrFan, post a reaction to his tweet
+                # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
                 if (status.user.id == 19570960) or (status.user.id == 25073877):
                     reply_text = ('I am a bot and I give this tweet'
-                                  + ' a %.1f out of 10 for absurdity.\n\n'
-                                  + 'Follow me for more funny predictions!') % (probs[0] * 10)
+                                  + ' a %.1f out of 10 for absurdity.') % (probs[0] * 10)
                     api.update_status(reply_text, in_reply_to_status_id=status.id,
                                       auto_populate_reply_metadata=True)
-
-                """
-                # If it's from Trump, post a reaction to his tweet
-                if status.user.id == 25073877:
-                    reply_text = get_reply_text(probs[0])
-                    api.update_status(reply_text, in_reply_to_status_id=status.id,
-                                      auto_populate_reply_metadata=True)
-                """
 
 
 # Authenticate to Twitter
