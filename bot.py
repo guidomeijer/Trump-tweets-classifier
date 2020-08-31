@@ -18,55 +18,40 @@ from os import environ
 from joblib import load
 
 
-def get_prediction_tweet_text(prediction, probability, user_id):
-
+def get_prediction_tweet_text(prediction, probability, user_id, tweet_id):
+    
     # Generate text of prediction
     if (prediction == 0) & (user_id == "19570960"):
-        pred_tweet_text = ('I predict this tweet is FAKE with a probability of %d%%.\n\n'
+        pred_tweet_text = (('I predict this tweet is FAKE with a probability of %d%%. '
                            + 'I was right, this tweet is from the parody account '
-                           + '@realDonaldTrFan.') % (probability * 100)
+                           + '@realDonaldTrFan. https://twitter.com/realDonaldTrFan/status/%s')
+                           % (probability * 100, tweet_id))
     elif (prediction == 1) & (user_id == "19570960"):
-        pred_tweet_text = ('Fake news! I predict this tweet is REAL (%d%% probability) but '
-                           + 'it is actually from the parody account '
-                           + '@realDonaldTrFan.') % (probability * 100)
+        pred_tweet_text = (('I predict this tweet is REAL (%d%% probability) but '
+                           + 'I was wrong! It is actually from the parody account '
+                           + '@realDonaldTrFan. https://twitter.com/realDonaldTrFan/status/%s')
+                           % (probability * 100, tweet_id))
     elif (prediction == 0) & (user_id == "1407822289"):
-        pred_tweet_text = ('I predict this tweet is FAKE with a probability of %d%%.\n\n'
+        pred_tweet_text = (('I predict this tweet is FAKE with a probability of %d%%. '
                            + 'I was right, this tweet is from the parody account '
-                           + '@RealDonalDrumpf.') % (probability * 100)
+                           + '@RealDonalDrumpf. https://twitter.com/RealDonalDrumpf/status/%s')
+                           % (probability * 100, tweet_id))
     elif (prediction == 1) & (user_id == "1407822289"):
-        pred_tweet_text = ('Fake news! I predict this tweet is REAL (%d%% probability) but '
-                           + 'it is actually from the parody account '
-                           + '@RealDonalDrumpf.') % (probability * 100)
+        pred_tweet_text = (('I predict this tweet is REAL (%d%% probability) but '
+                           + 'I was wrong! It is actually from the parody account '
+                           + '@RealDonalDrumpf. https://twitter.com/RealDonalDrumpf/status/%s')
+                           % (probability * 100, tweet_id))
     elif (prediction == 1) & (user_id == "25073877"):
-        pred_tweet_text = ('I predict this tweet is REAL with a probability of %d%%.\n\n'
+        pred_tweet_text = (('I predict this tweet is REAL with a probability of %d%%. '
                            + 'I was right, this tweet is from '
-                           + '@realDonaldTrump himself.') % (probability * 100)
+                           + '@realDonaldTrump. https://twitter.com/realDonaldTrump/status/%s')
+                           % (probability * 100, tweet_id))
     elif (prediction == 0) & (user_id == "25073877"):
-        pred_tweet_text = ('This is weird! This tweet looks FAKE to me (%d%% probability) '
-                           + 'but it is really from @realDonaldTrump!') % (probability * 100)
+        pred_tweet_text = (('I predict this tweet is FAKE (%d%% probability) '
+                           + 'but I was wrong! It is from @realDonaldTrump himself. '
+                           + 'https://twitter.com/realDonaldTrump/status/%s')
+                           % (probability * 100, tweet_id))
     return pred_tweet_text
-
-
-def post_tweet(tweet_text, prediction, probability, user_id):
-
-    # Post original tweet
-    try:
-        first_tweet = api.update_status(tweet_text)
-    except:
-        print('Tweet was already tweeted, abort!')
-        return
-
-    # Post prediction of classifier as tweet
-    second_tweet_text = get_prediction_tweet_text(prediction, probability, user_id)
-    api.update_status(second_tweet_text, in_reply_to_status_id=first_tweet.id)
-
-
-def get_tweet_text(status):
-    if 'extended_tweet' in status._json:
-        tweet_text = status.extended_tweet['full_text']
-    else:
-        tweet_text = status.text
-    return tweet_text
 
 
 def is_tweet(status):
@@ -90,9 +75,12 @@ class MyStreamListener(tweepy.StreamListener):
 
         # Check if it's an original post and not a retweet, reply or quote
         if is_tweet(status):
-
-            # Get the tweet text
-            tweet_text = get_tweet_text(status)
+            
+            # Get the tweet text    
+            if 'extended_tweet' in status._json:
+                tweet_text = status.extended_tweet['full_text']
+            else:
+                tweet_text = status.text
 
             # Remove weird & symbol text
             tweet_text = tweet_text.replace('&amp;', '&')
@@ -112,13 +100,26 @@ class MyStreamListener(tweepy.StreamListener):
                 if ((((prediction == 1) & (probability < 0.8)) or (prediction == 0))
                         and (np.random.randint(3) == 0)):
 
-                    # Post tweet to timeline
-                    post_tweet(tweet_text, prediction, probability, status.user.id_str)
+                    # Post tweet to timeline 
+                    try:
+                        first_tweet = api.update_status(tweet_text)
+                    except:
+                        print('Tweet was already tweeted, abort!')
+                        return
+                
+                    # Post prediction of classifier as tweet
+                    second_tweet_text = get_prediction_tweet_text(prediction, probability,
+                                                                  status.user.id, status.id)
+                    api.update_status(second_tweet_text, in_reply_to_status_id=first_tweet.id)
 
                 # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
                 if (status.user.id == 19570960) or (status.user.id == 25073877):
-                    reply_text = ('I am a bot and I give this tweet'
-                                  + ' a %.1f out of 10 for absurdity.') % (probs[0] * 10)
+                    if np.mod(probs[0], 0) > 0.05:
+                        reply_text = ('I give this tweet a %.1f out of 10 for absurdity.'
+                                      % (probs[0] * 10))
+                    else:
+                        reply_text = ('I give this tweet a %d out of 10 for absurdity.'
+                                      % np.round(probs[0] * 10))
                     api.update_status(reply_text, in_reply_to_status_id=status.id,
                                       auto_populate_reply_metadata=True)
 
