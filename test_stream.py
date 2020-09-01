@@ -35,13 +35,14 @@ class MyStreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
 
-        if status.in_reply_to_user_id == status.user.id:
-            print(status.id)
-            exit(1)
+        print(status)
+        print(status.id)
+        exit(1)
 
 
 # Authenticate to Twitter
-api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
+# api_keys = pd.read_csv('D:\\Repositories\\Trump-tweets-classifier\\keys.csv')
+api_keys = pd.read_csv('keys.csv')
 auth = tweepy.OAuthHandler(api_keys['api_key'].values[0],
                            api_keys['api_key_secret'].values[0])
 auth.set_access_token(api_keys['access_token'].values[0],
