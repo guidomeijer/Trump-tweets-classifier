@@ -75,6 +75,10 @@ class MyStreamListener(tweepy.StreamListener):
 
         # Check if it's an original post and not a retweet, reply or quote
         if is_tweet(status):
+
+            # Get tweet and user id
+            tweet_id = status.id
+            user_id = status.user.id
             
             # Get the tweet text    
             if 'extended_tweet' in status._json:
@@ -108,21 +112,19 @@ class MyStreamListener(tweepy.StreamListener):
                         return
                 
                     # Post prediction of classifier as tweet
-                    second_tweet_text = get_prediction_tweet_text(prediction,
-                                                                  probability,
-                                                                  status.user.id, 
-                                                                  status.id)
+                    second_tweet_text = get_prediction_tweet_text(prediction, probability,
+                                                                  user_id, tweet_id)
                     api.update_status(second_tweet_text, in_reply_to_status_id=first_tweet.id)
 
                 # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
-                if (status.user.id == 19570960) or (status.user.id == 25073877):
+                if (user_id == 19570960) or (user_id == 25073877):
                     if np.mod(probs[0], 1) > 0.05:
                         reply_text = ('I give this tweet a %.1f out of 10 for absurdity.'
                                       % (probs[0] * 10))
                     else:
                         reply_text = ('I give this tweet a %d out of 10 for absurdity.'
                                       % np.round(probs[0] * 10))
-                    api.update_status(reply_text, in_reply_to_status_id=status.id,
+                    api.update_status(reply_text, in_reply_to_status_id=tweet_id,
                                       auto_populate_reply_metadata=True)
 
 
