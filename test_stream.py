@@ -36,7 +36,8 @@ class MyStreamListener(tweepy.StreamListener):
     def on_status(self, status):
 
         print(status)
-        print(status.id)
+        print(status.user.id)
+        print(type(status.user.id))
         exit(1)
 
 

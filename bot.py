@@ -18,38 +18,39 @@ from os import environ
 from joblib import load
 
 
-def get_prediction_tweet_text(prediction, probability, user_id, tweet_url):
+def get_prediction_tweet_text(prediction, probability, user_id, tweet_id):
     
     # Generate text of prediction
-    if (prediction == 0) & (user_id == "19570960"):
+    if (prediction == 0) & (user_id == 19570960):
         pred_tweet_text = (('I predict this tweet is FAKE with a probability of %d%%. '
                            + 'I was right, this tweet is from the parody account '
-                           + '@realDonaldTrFan. %s')
-                           % (probability * 100, tweet_url))
-    elif (prediction == 1) & (user_id == "19570960"):
+                           + '@realDonaldTrFan. https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
+    elif (prediction == 1) & (user_id == 19570960):
         pred_tweet_text = (('I predict this tweet is REAL (%d%% probability) but '
                            + 'I was wrong! It is actually from the parody account '
-                           + '@realDonaldTrFan. %s')
-                           % (probability * 100, tweet_url))
-    elif (prediction == 0) & (user_id == "1407822289"):
+                           + '@realDonaldTrFan. https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
+    elif (prediction == 0) & (user_id == 1407822289):
         pred_tweet_text = (('I predict this tweet is FAKE with a probability of %d%%. '
                            + 'I was right, this tweet is from the parody account '
-                           + '@RealDonalDrumpf. %s')
-                           % (probability * 100, tweet_url))
-    elif (prediction == 1) & (user_id == "1407822289"):
+                           + '@RealDonalDrumpf. https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
+    elif (prediction == 1) & (user_id == 1407822289):
         pred_tweet_text = (('I predict this tweet is REAL (%d%% probability) but '
                            + 'I was wrong! It is actually from the parody account '
-                           + '@RealDonalDrumpf. %s')
-                           % (probability * 100, tweet_url))
-    elif (prediction == 1) & (user_id == "25073877"):
+                           + '@RealDonalDrumpf. https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
+    elif (prediction == 1) & (user_id == 25073877):
         pred_tweet_text = (('I predict this tweet is REAL with a probability of %d%%. '
                            + 'I was right, this tweet is from '
-                           + '@realDonaldTrump. %s')
-                           % (probability * 100, tweet_url))
-    elif (prediction == 0) & (user_id == "25073877"):
+                           + '@realDonaldTrump. https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
+    elif (prediction == 0) & (user_id == 25073877):
         pred_tweet_text = (('I predict this tweet is FAKE (%d%% probability) '
-                           + 'but I was wrong! It is from @realDonaldTrump himself. %s')
-                           % (probability * 100, tweet_url))
+                           + 'but I was wrong! It is from @realDonaldTrump himself. '
+                           + 'https://twitter.com/user/status/%s')
+                           % (probability * 100, tweet_id))
     return pred_tweet_text
 
 
@@ -110,7 +111,7 @@ class MyStreamListener(tweepy.StreamListener):
                     second_tweet_text = get_prediction_tweet_text(prediction,
                                                                   probability,
                                                                   status.user.id, 
-                                                                  status.expanded_url)
+                                                                  status.id)
                     api.update_status(second_tweet_text, in_reply_to_status_id=first_tweet.id)
 
                 # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
