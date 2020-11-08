@@ -37,7 +37,7 @@ twitter_data = pd.DataFrame()
 real_tweets = api.user_timeline(screen_name='realDonaldTrump', count=200, include_rts=False,
                                 tweet_mode='extended', exclude_replies=True)
 oldest = real_tweets[-1].id - 1
-while len(real_tweets) < 1000:
+while len(real_tweets) < 1500:
     new_real_tweets = api.user_timeline(screen_name='realDonaldTrump', count=200,
                                         include_rts=False, tweet_mode='extended',
                                         exclude_replies=True, max_id=oldest)
@@ -53,7 +53,7 @@ for i in range(len(real_tweets)):
 fake1_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200, include_rts=False,
                                  tweet_mode='extended', exclude_replies=True)
 oldest = fake1_tweets[-1].id - 1
-while len(fake1_tweets) < 500:
+while len(fake1_tweets) < 750:
     new_fake1_tweets = api.user_timeline(screen_name='realDonaldTrFan', count=200,
                                          include_rts=False, tweet_mode='extended',
                                          exclude_replies=True, max_id=oldest)
@@ -69,7 +69,7 @@ for i in range(len(fake1_tweets)):
 fake2_tweets = api.user_timeline(screen_name='RealDonalDrumpf', count=200, include_rts=False,
                                  tweet_mode='extended', exclude_replies=True)
 oldest = fake2_tweets[-1].id - 1
-while len(fake2_tweets) < 500:
+while len(fake2_tweets) < 750:
     new_fake2_tweets = api.user_timeline(screen_name='RealDonalDrumpf', count=200,
                                          include_rts=False, tweet_mode='extended',
                                          exclude_replies=True, max_id=oldest)
@@ -86,13 +86,11 @@ for i, index in enumerate(twitter_data.index.values):
     # Replace '&' character
     twitter_data.loc[index, 'text'] = twitter_data.loc[index, 'text'].replace('&amp;', '&')
 
-    # Create field excluding the link
-    no_link = list(filter(lambda x: 'http' not in x, twitter_data.loc[index, 'text'].split()))
-    tweet_without_link = ' '.join(word for word in no_link)
-    twitter_data.loc[index, 'text_no_link'] = tweet_without_link
-
 # Remove empty entries
-twitter_data = twitter_data[twitter_data['text_no_link'] != '']
+twitter_data = twitter_data[twitter_data['text'] != '']
+
+# Remove entries with links
+twitter_data = twitter_data[twitter_data['text'].str.find('http') == -1]
 
 # Save this dataset
 twitter_data.to_csv('%s_twitter_training_data.csv' % str(date.today()))
@@ -103,7 +101,7 @@ pipeline_sgd = Pipeline([('vect', CountVectorizer()),
                          ('nb', SGDClassifier(loss='log'))])
 
 # Train on half of the dataset and predict the other half to get a sense of performance
-X_train, X_test, y_train, y_test = train_test_split(twitter_data['text_no_link'],
+X_train, X_test, y_train, y_test = train_test_split(twitter_data['text'],
                                                     twitter_data['real'],
                                                     random_state=42)
 cross_val_model = pipeline_sgd.fit(X_train, y_train)
@@ -111,5 +109,5 @@ y_predict = cross_val_model.predict(X_test)
 print(classification_report(y_test, y_predict))
 
 # Now train on the full dataset
-full_model = pipeline_sgd.fit(twitter_data['text_no_link'].values, twitter_data['real'].values)
+full_model = pipeline_sgd.fit(twitter_data['text'].values, twitter_data['real'].values)
 dump(full_model, '%s_SGD_model.joblib' % str(date.today()))

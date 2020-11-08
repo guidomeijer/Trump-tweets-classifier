@@ -19,7 +19,7 @@ from joblib import load
 
 
 def get_prediction_tweet_text(prediction, probability, user_id, tweet_id):
-    
+
     # Generate text of prediction
     if (prediction == 0) & (user_id == 19570960):
         pred_tweet_text = (('I predict this tweet is FAKE with a probability of %d%%. '
@@ -79,8 +79,8 @@ class MyStreamListener(tweepy.StreamListener):
             # Get tweet and user id
             tweet_id = status.id
             user_id = status.user.id
-            
-            # Get the tweet text    
+
+            # Get the tweet text
             if 'extended_tweet' in status._json:
                 tweet_text = status.extended_tweet['full_text']
             else:
@@ -94,7 +94,7 @@ class MyStreamListener(tweepy.StreamListener):
             if ('http' not in tweet_text) and (tweet_text[-2:] != '..'):
 
                 # Predict whether tweet is real or fake
-                clf = load('2020-05-14_SGD_model.joblib')
+                clf = load('2020-11-08_SGD_model.joblib')
                 prediction = clf.predict([tweet_text])[0]
                 probs = clf.predict_proba([tweet_text])[0]
                 probability = probs[int(prediction)]
@@ -104,13 +104,13 @@ class MyStreamListener(tweepy.StreamListener):
                 if ((((prediction == 1) & (probability < 0.8)) or (prediction == 0))
                         and (np.random.randint(3) == 0)):
 
-                    # Post tweet to timeline 
+                    # Post tweet to timeline
                     try:
                         first_tweet = api.update_status(tweet_text)
                     except:
                         print('Tweet was already tweeted, abort!')
                         return
-                
+
                     # Post prediction of classifier as tweet
                     second_tweet_text = get_prediction_tweet_text(prediction, probability,
                                                                   user_id, tweet_id)
@@ -118,12 +118,12 @@ class MyStreamListener(tweepy.StreamListener):
 
                 # If it's from Trump or realDonaldTrFan, post a reaction to his tweet
                 if (user_id == 19570960) or (user_id == 25073877):
-                    if np.mod(probs[0], 1) > 0.05:
+                    if np.mod(probs[0] * 10, 1) > 0.05:
                         reply_text = ('I give this tweet a %.1f out of 10 for absurdity.'
                                       % (probs[0] * 10))
                     else:
                         reply_text = ('I give this tweet a %d out of 10 for absurdity.'
-                                      % np.round(probs[0] * 10))
+                                      % int(probs[0] * 10))
                     api.update_status(reply_text, in_reply_to_status_id=tweet_id,
                                       auto_populate_reply_metadata=True)
 

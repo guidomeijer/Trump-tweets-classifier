@@ -82,7 +82,7 @@ twitter_data = twitter_data[twitter_data['text_no_link'] != '']
 twitter_data['id'] = twitter_data['id'].astype('int64')
 
 # Load in the fully trained linear support vector machine classifier
-clf = load('2020-05-14_SGD_model.joblib')
+clf = load('2020-08-14_SGD_model.joblib')
 
 # Classify all tweets
 twitter_data = twitter_data.reset_index()
