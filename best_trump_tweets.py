@@ -26,7 +26,7 @@ def tweepy_to_df(tweets, twitter_data=[]):
 
     for i in range(len(tweets)):
         twitter_data.loc[twitter_data.shape[0] + 1, 'text'] = tweets[i].full_text
-        twitter_data.loc[twitter_data.shape[0], 'id'] = int(tweets[i].id)
+        twitter_data.loc[twitter_data.shape[0], 'id'] = str(tweets[i].id)
         twitter_data.loc[twitter_data.shape[0], 'date'] = tweets[i].created_at
     return twitter_data
 
@@ -52,7 +52,7 @@ oldest = tweets[-1].id - 1
 twitter_data = tweepy_to_df(tweets)
 
 # Query more until amount is reached
-while twitter_data.shape[0] <= 1000:
+while twitter_data.shape[0] <= 1800:
     print('Scraped %d tweets from realDonaldTrump..' % twitter_data.shape[0])
     new_tweets = []
     while len(new_tweets) == 0:
@@ -70,23 +70,21 @@ for i, index in enumerate(twitter_data.index.values):
     # Replace '&' character
     twitter_data.loc[index, 'text'] = twitter_data.loc[index, 'text'].replace('&amp;', '&')
 
-    # Create field excluding the link
-    no_link = list(filter(lambda x: 'http' not in x, twitter_data.loc[index, 'text'].split()))
-    tweet_without_link = ' '.join(word for word in no_link)
-    twitter_data.loc[index, 'text_no_link'] = tweet_without_link
-
 # Remove empty entries
-twitter_data = twitter_data[twitter_data['text_no_link'] != '']
+twitter_data = twitter_data[twitter_data['text'] != '']
+
+# Remove entries with links
+twitter_data = twitter_data[twitter_data['text'].str.find('http') == -1]
 
 # Convert id's to int64
-twitter_data['id'] = twitter_data['id'].astype('int64')
+#twitter_data['id'] = twitter_data['id'].astype('int64')
 
 # Load in the fully trained linear support vector machine classifier
-clf = load('2020-08-14_SGD_model.joblib')
+clf = load('2020-05-14_SGD_model.joblib')
 
 # Classify all tweets
 twitter_data = twitter_data.reset_index()
-for i, tweet_text in enumerate(twitter_data['text_no_link']):
+for i, tweet_text in enumerate(twitter_data['text']):
 
     # Get probability that its from the parody account
     prediction = clf.predict([tweet_text])[0]

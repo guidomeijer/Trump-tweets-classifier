@@ -72,7 +72,7 @@ for i, index in enumerate(twitter_data.index.values):
     twitter_data.loc[index, 'text'] = twitter_data.loc[index, 'text'].replace('&amp;', '&')
 
 # Remove empty entries
-twitter_data = twitter_data[twitter_data['text_no_link'] != '']
+twitter_data = twitter_data[twitter_data['text'] != '']
 
 # Remove entries with links
 twitter_data = twitter_data[twitter_data['text'].str.find('http') == -1]
@@ -100,9 +100,14 @@ plot_data = twitter_data[twitter_data['probability'] > 0.5]
 #score_conv = np.convolve(plot_data['probability'].rolling(window=7).mean(),
 #                         np.ones((3,))/3, mode='valid')
 #score_conv = np.append(score_conv, [np.nan, np.nan])
-score_conv = medfilt(plot_data['probability'].rolling(window=10).mean(), kernel_size=3)
+#score_over_time = medfilt(plot_data['probability'].rolling(window=10).mean(), kernel_size=3)
+score_over_time = plot_data['probability'].rolling(window=10).mean()
 
+sns.set(context='talk', style='ticks')
 f, ax1 = plt.subplots(1, 1, figsize=(10, 10), dpi=150)
-ax1.scatter(plot_data['date'], plot_data['probability'])
-ax1.plot(plot_data['date'], score_conv)
+ax1.scatter(plot_data['date'], plot_data['probability'], color=[0.7, 0.7, 0.7])
+ax1.plot(plot_data['date'], score_over_time, color='r', lw=5, label='10 day moving average')
+ax1.set(ylabel='Absurdity index', title='Absurdness of Trump''s tweets over time')
+plt.legend(frameon=False)
+sns.despine(trim=True)
 
